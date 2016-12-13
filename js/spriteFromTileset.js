@@ -12,14 +12,16 @@ var Container = PIXI.Container,
     texture,
     texture2,
     sparr,
+
     coordinatsArray,
     currentPiece,
     Rectangle = PIXI.Rectangle;
     Graphics = PIXI.Graphics;
-
+var clickPos={};
+var sprArr=[];
 //Create a Pixi stage and renderer
 var stage = new Container(),
-    renderer = autoDetectRenderer(400, 400);
+    renderer = autoDetectRenderer(300, 300);
 document.body.appendChild(renderer.view);
 stage.interactive=true;
 //Set the canvas's border style and background color
@@ -41,8 +43,8 @@ var state = undefined,
     id = undefined;
 
 function setup() {
-  texture = TextureCache["img/images.png"]; //for add picec1
-  //texture = TextureCache["img/pict.png"];
+  //texture = TextureCache["img/images.png"]; //for add picec1
+  texture = TextureCache["img/pict.png"];
 
   //Fix possible texture bleed
 
@@ -100,20 +102,7 @@ function setup() {
 
 }
 
-function addPieceToStage2(){
 
-    sprite = new PIXI.Sprite(texture);
-    //var texture2 = new PIXI.Texture(texture, new PIXI.Rectangle(50, 50, 20, 20))
-    //sprite.setTexture(texture2);
-    for (var i = 0 ; i< 16; i++){
-        texture2[i]=new PIXI.Texture(texture, new PIXI.Rectangle(50, 50, 20, 20));
-        sprite[i].setTexture(texture2[i]);
-        stage.addChild(sprite[i]);
-    }
-
-
-
-}
 
 
 function addPieceToStage() {
@@ -149,16 +138,88 @@ var id = PIXI.loader.resources["img/images.json"].textures;
         var oneSpr=new Sprite(id["pict_"+val+".png"]);
         oneSpr.initialNumb=i;
         sparr.push(oneSpr);
+
     }
 
 
 
 
     //sparr.sort(compareRandom);
-    addPiecesToStage(sparr);
+    //addPiecesToStage(sparr);
+    //addPieceToStage2();
+    createSpriteArray ();
+
+}
+
+function createSpriteArray () {
+    var rectArr=[];
+    var texturesArr=[];
+
+    var mySpriteSheetImage  = PIXI.BaseTexture.fromImage("img/pict.png");
+
+    for(var i=0; i<4; i++) {
+        rectArr[i] = [];
+        texturesArr [i] = [];
+        sprArr[i] = [];
+        for (var j = 0; j < 4; j++) {
+
+
+            rectArr[i][j] = new Rectangle(75 * i, 75 * j, 75, 75);
+            texturesArr[i][j] = new PIXI.Texture(mySpriteSheetImage, rectArr[i][j])
+
+            sprArr[i][j] = new Sprite(texturesArr[i][j]);
+        }
+
+    }
+
+    addPieceToStage2(sprArr);
+
+}
+
+function addPieceToStage2(array) {
+    // var rectArr=[];
+    // var texturesArr=[];
+    // var sprArr=[];
+    // var mySpriteSheetImage  = PIXI.BaseTexture.fromImage("img/pict.png");
+
+    for(var i=0; i<4; i++){
+        // rectArr[i] = [];
+        // texturesArr [i]=[];
+        // sprArr[i] =[];
+        for(var j=0; j<4; j++){
 
 
 
+            // rectArr[i][j]= new Rectangle (75*i,75*j,75,75);
+            // texturesArr[i][j]= new PIXI.Texture(mySpriteSheetImage,rectArr[i][j])
+            //
+            // sprArr[i][j]= new Sprite(texturesArr[i][j]);
+            array[i][j].x=i*75;
+            array[i][j].y=j*75;
+            array[i][j].column=i;
+            array[i][j].row=j;
+            array[i][j].interactive = true;
+
+
+            array[i][j]
+                .on('mousedown', onDragStart)
+                .on('mouseover',onMouseOver)
+                .on('touchstart', onDragStart)
+                .on('mouseup', onDragEnd)
+                .on('mouseupoutside', onDragEnd)
+                .on('touchend', onDragEnd)
+                .on('touchendoutside', onDragEnd)
+                .on('mousemove', onDragMove)
+                .on('touchmove', onDragMove);
+            stage.addChild(array[i][j]);
+
+        }
+    }
+
+    //console.log(arr);
+
+
+    animate();
 
 
 
@@ -173,14 +234,13 @@ function animate() {
 
 
 function onMouseOver (){
-    console.log("over " + this.numb)
 
 
 }
 
 function onDragStart(event){
     console.log("start");
-    console.log("this.numb "+this.numb);
+
 
     // store a reference to the data
     // the reason for this is because of multitouch
@@ -189,12 +249,24 @@ function onDragStart(event){
 
     this.alpha = 0.5;
     this.dragging = true;
+    clickPos.x=this.position.x;
+    clickPos.y=this.position.y;
 
 }
 
 
 
 function onDragEnd() {
+    console.log("clickPos.x" + clickPos.x+ " " +Math.round(this.position.x));
+    console.log(sprArr);
+    var newXpos=Math.round(this.position.x);
+    var newYpos=Math.round(this.position.y);
+    var sprfromX=this.column;
+    var sprfromY=this.row;
+    console.log("fromX "+sprfromX+ " fromY" + sprfromY);
+    var toX=(Math.floor((newXpos+75)/75))-1;
+    var toY=(Math.floor((newYpos+75)/75))-1;
+    console.log("toX "+toX+ " toY" + toY);
 
     this.alpha = 1;
 
@@ -203,13 +275,16 @@ function onDragEnd() {
     // set the interaction data to null
     this.data = null;
 
+
     for (var i = stage.children.length - 1; i >= 0; i--) {
         stage.removeChild(stage.children[i]);
     };
 
 
-    //var tt=swapPlaces(sparr,this.numb,1);
-    //addPiecesToStage(tt);
+    var arrayChange=swapPlacesInMatrix(sprArr,sprfromX,sprfromY,toY,toX);
+    addPieceToStage2(arrayChange);
+
+
 
 
 
@@ -217,7 +292,7 @@ function onDragEnd() {
 }
 
 function onDragMove(){
-    console.log("move");
+
 
 
 
@@ -225,7 +300,7 @@ function onDragMove(){
     {
 
         var newPosition = this.data.getLocalPosition(this.parent);
-
+        ///console.log(this.data);
             if(newPosition.x>225){
                 newPosition.x = Math.min(this.x, 225); //TODO not number -stage.width-this.width
 
@@ -236,9 +311,10 @@ function onDragMove(){
 
             }
 
-        var old=coordinatsArray[this.numb][0];
-        var put=Math.round(newPosition.x);
-        console.log("put"+put+" "+old);
+        //var old=coordinatsArray[this.numb][0];
+        //var put=Math.round(newPosition.x);
+        console.log("column "+ this.column + " row " + this.row);
+
 
         //this.offset=old%put;
         this.position.x = newPosition.x;
@@ -248,14 +324,14 @@ function onDragMove(){
         //console.log(ww);
 
 
-
-
-
-
     }
 
 
 }
+
+
+
+
 
 
 function addPiecesToStage(array){
@@ -272,9 +348,9 @@ function addPiecesToStage(array){
         array[j].numb=j;
         array[j].interactive = true;
 
+
         array[j]
             .on('mousedown', onDragStart)
-            .on('mouseover', onMouseOver)
             .on('touchstart', onDragStart)
             .on('mouseup', onDragEnd)
             .on('mouseupoutside', onDragEnd)
@@ -283,7 +359,12 @@ function addPiecesToStage(array){
             .on('mousemove', onDragMove)
             .on('touchmove', onDragMove);
 
-    };
+
+
+
+        }
+
+
 
 
     animate();
@@ -298,13 +379,42 @@ function addPiecesToStage(array){
 
 
 function swapPlaces(array,from,to) {
-    array[from] = array.splice(to, 1, array[from])[0];
 
+    array.splice(to, 0, array.splice(from, 1)[0]);
     return array;
+
+
 
 
 }
 
+
+function swapPlacesInMatrix(array,columnFrom,rowFrom,rowTo,columnTo) {
+
+    var tempFrom=array[columnFrom][rowFrom];
+    console.log("tempFr" + tempFrom)
+    var tempTo=array[columnTo][rowTo];
+    console.log("tempTo" + tempTo)
+
+    for (var i = 0; i<4 ; i++){
+        // column to change = offsetX, in row = offsetY
+
+        for (var j = 0 ; j<4 ; j++){
+
+
+            array[columnFrom][rowFrom]=array[columnTo][rowTo];
+            array[columnTo][rowTo]=tempFrom;
+            array[columnFrom][rowFrom]=tempTo;
+
+
+        }
+
+    }
+
+
+return array;
+
+}
 
 
 
