@@ -1,4 +1,3 @@
-//Aliases
 
 
 var Container = PIXI.Container,
@@ -10,146 +9,41 @@ var Container = PIXI.Container,
     TextureCache = PIXI.utils.TextureCache,
     Sprite = PIXI.Sprite,
     texture,
-    texture2,
-    sparr,
-
     coordinatsArray,
-    currentPiece,
     Rectangle = PIXI.Rectangle;
     Graphics = PIXI.Graphics;
+
 var clickPos={};
 var sprArr=[];
-//Create a Pixi stage and renderer
+
 var stage = new Container(),
-    renderer = autoDetectRenderer(300, 300);
+renderer = autoDetectRenderer(300, 300);
+
 document.body.appendChild(renderer.view);
-stage.interactive=true;
-//Set the canvas's border style and background color
+
 renderer.view.style.border = "1px dashed black";
 renderer.backgroundColor = "0xFFFFFF";
 
-//load an image and run the `setup` function when it's done
+
 loader.add("img/images.json")
        .add("img/pict.png")
-        .load(setup);
-//Define any variables that are used in more than one function
-var state = undefined,
+       .load(setup);
 
-    b = undefined,
-
-    adventuress,
-
-
-    id = undefined;
 
 function setup() {
-  //texture = TextureCache["img/images.png"]; //for add picec1
-  texture = TextureCache["img/pict.png"];
-
-  //Fix possible texture bleed
 
 
 
-  var left = keyboard(37),
-      up = keyboard(38),
-      right = keyboard(39),
-      down = keyboard(40);
-
-  //Left arrow key `press` method
-  left.press = function () {
-    // animate(function() {
-    //   if(adventuress.x<250){
-    //
-    //     adventuress.x += 50;
-    //
-    //   }
-    //
-    // }, 10000);
-      //addPieceToStage()
-
-   console.log("left")
-    //Change the explorer.s velocity when the key is pressed
-
-
-  };
-  left.release = function () {
-
-    //If the left arrow has been released, and the right arrow isn't down,
-    //and the explorer.isn't moving vertically, stop the sprite from moving
-    //by setting its velocity to zero
-    if (!right.isDown) {
-      console.log("left release")
-
-    }
-  };
-
-
-  //Set the game's current state to `play`
-
-
-  //Start the game loop
-
-    addPieceToStage();
+    createSpriteArray();
 
     renderer.render(stage);
 
-
-
-
-
-
-
-
 }
 
 
 
 
-function addPieceToStage() {
-var id = PIXI.loader.resources["img/images.json"].textures;
 
-    var sprite;
-
-    coordinatsArray=[
-        [0,0],
-        [75,0],
-        [150,0],
-        [225,0],
-        [0,75],
-        [75,75],
-        [150, 75],
-        [225, 75],
-        [0,150],
-        [75,150],
-        [150,150],
-        [225,150],
-        [0,225],
-        [75,225],
-        [150,225],
-        [225,225]
-    ];
-
-
-
-
-    sparr=[];
-    for(var i = 1; i<17 ; i++){
-        var val = i < 10 ? '0' + i : i;
-        var oneSpr=new Sprite(id["pict_"+val+".png"]);
-        oneSpr.initialNumb=i;
-        sparr.push(oneSpr);
-
-    }
-
-
-
-
-    //sparr.sort(compareRandom);
-    //addPiecesToStage(sparr);
-    //addPieceToStage2();
-    createSpriteArray ();
-
-}
 
 function createSpriteArray () {
     var rectArr=[];
@@ -177,33 +71,24 @@ function createSpriteArray () {
 }
 
 function addPieceToStage2(array) {
-    // var rectArr=[];
-    // var texturesArr=[];
-    // var sprArr=[];
-    // var mySpriteSheetImage  = PIXI.BaseTexture.fromImage("img/pict.png");
+
 
     for(var i=0; i<4; i++){
-        // rectArr[i] = [];
-        // texturesArr [i]=[];
-        // sprArr[i] =[];
+
         for(var j=0; j<4; j++){
 
-
-
-            // rectArr[i][j]= new Rectangle (75*i,75*j,75,75);
-            // texturesArr[i][j]= new PIXI.Texture(mySpriteSheetImage,rectArr[i][j])
-            //
-            // sprArr[i][j]= new Sprite(texturesArr[i][j]);
             array[i][j].x=i*75;
             array[i][j].y=j*75;
             array[i][j].column=i;
             array[i][j].row=j;
             array[i][j].interactive = true;
 
+            // array[i][j].anchor.x=0.5;
+            // array[i][j].anchor.y=0.5;
+
 
             array[i][j]
                 .on('mousedown', onDragStart)
-                .on('mouseover',onMouseOver)
                 .on('touchstart', onDragStart)
                 .on('mouseup', onDragEnd)
                 .on('mouseupoutside', onDragEnd)
@@ -216,13 +101,8 @@ function addPieceToStage2(array) {
         }
     }
 
-    //console.log(arr);
-
 
     animate();
-
-
-
 
 }
 
@@ -233,22 +113,15 @@ function animate() {
 }
 
 
-function onMouseOver (){
-
-
-}
 
 function onDragStart(event){
     console.log("start");
 
-
-    // store a reference to the data
-    // the reason for this is because of multitouch
-    // we want to track the movement of this particular touch
     this.data = event.data;
 
     this.alpha = 0.5;
     this.dragging = true;
+
     clickPos.x=this.position.x;
     clickPos.y=this.position.y;
 
@@ -257,22 +130,26 @@ function onDragStart(event){
 
 
 function onDragEnd() {
-    console.log("clickPos.x" + clickPos.x+ " " +Math.round(this.position.x));
-    console.log(sprArr);
+
     var newXpos=Math.round(this.position.x);
     var newYpos=Math.round(this.position.y);
+    console.log("toXPos "+newXpos+ " toXPos "  + newYpos);
+
     var sprfromX=this.column;
     var sprfromY=this.row;
-    console.log("fromX "+sprfromX+ " fromY" + sprfromY);
+
+    console.log("fromX "+sprfromX+ " fromY "  + sprfromY);
+
     var toX=(Math.floor((newXpos+75)/75))-1;
     var toY=(Math.floor((newYpos+75)/75))-1;
-    console.log("toX "+toX+ " toY" + toY);
+
+    console.log("toX "+toX+ " toY " + toY);
 
     this.alpha = 1;
 
     this.dragging = false;
 
-    // set the interaction data to null
+
     this.data = null;
 
 
@@ -281,8 +158,8 @@ function onDragEnd() {
     };
 
 
-    var arrayChange=swapPlacesInMatrix(sprArr,sprfromX,sprfromY,toY,toX);
-    addPieceToStage2(arrayChange);
+    swapPlacesInMatrix(sprArr,sprfromX,sprfromY,toY,toX);
+
 
 
 
@@ -300,80 +177,31 @@ function onDragMove(){
     {
 
         var newPosition = this.data.getLocalPosition(this.parent);
-        ///console.log(this.data);
-            if(newPosition.x>225){
-                newPosition.x = Math.min(this.x, 225); //TODO not number -stage.width-this.width
+
+            if(newPosition.x>300){
+                newPosition.x = Math.min(this.x, 300); //TODO not number -stage.width-this.width
 
             }
 
-            if(newPosition.y>225){
-                newPosition.y = Math.min(this.y, 225); //TODO not number -stage.height-this.height
+            if(newPosition.y>300){
+                newPosition.y = Math.min(this.y, 300); //TODO not number -stage.height-this.height
 
             }
 
-        //var old=coordinatsArray[this.numb][0];
-        //var put=Math.round(newPosition.x);
-        console.log("column "+ this.column + " row " + this.row);
 
 
-        //this.offset=old%put;
+
+
+
         this.position.x = newPosition.x;
         this.position.y = newPosition.y;
 
-        //var ww=onMouseOver ();
-        //console.log(ww);
 
 
     }
 
 
 }
-
-
-
-
-
-
-function addPiecesToStage(array){
-
-
-    for(var j = 0; j<array.length ; j++){
-        //console.log(coordinatsArray[j])
-
-
-
-        array[j].x=coordinatsArray[j][0];
-        array[j].y=coordinatsArray[j][1];
-        stage.addChild(array[j]);
-        array[j].numb=j;
-        array[j].interactive = true;
-
-
-        array[j]
-            .on('mousedown', onDragStart)
-            .on('touchstart', onDragStart)
-            .on('mouseup', onDragEnd)
-            .on('mouseupoutside', onDragEnd)
-            .on('touchend', onDragEnd)
-            .on('touchendoutside', onDragEnd)
-            .on('mousemove', onDragMove)
-            .on('touchmove', onDragMove);
-
-
-
-
-        }
-
-
-
-
-    animate();
-
-}
-
-
-
-
 
 
 
@@ -412,7 +240,7 @@ function swapPlacesInMatrix(array,columnFrom,rowFrom,rowTo,columnTo) {
     }
 
 
-return array;
+    addPieceToStage2(array);
 
 }
 
