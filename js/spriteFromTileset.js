@@ -1,7 +1,9 @@
 
 
 var Container = PIXI.Container,
+    ParticleContainer=PIXI.ParticleContainer,
     autoDetectRenderer = PIXI.autoDetectRenderer,
+
     loader = PIXI.loader,
     resources = PIXI.loader.resources,
     Sprite = PIXI.Sprite,
@@ -15,8 +17,14 @@ var Container = PIXI.Container,
 
 var clickPos={};
 var sprArr=[];
+var initialArr=[];
 
-var stage = new Container(),
+ var stage = new Container(),
+
+// var stage= new ParticleContainer(300,{
+//
+//     interactiveChildren:true
+// })
 renderer = autoDetectRenderer(300, 300);
 
 document.body.appendChild(renderer.view);
@@ -33,7 +41,9 @@ loader.add("img/images.json")
 function setup() {
 
 
+    //snuffle2D();
 
+    //console.log(ww);
     createSpriteArray();
 
     renderer.render(stage);
@@ -49,7 +59,7 @@ function createSpriteArray () {
     var rectArr=[];
     var texturesArr=[];
 
-    var mySpriteSheetImage  = PIXI.BaseTexture.fromImage("img/pict.png");
+    var mySpriteSheetImage  = TextureCache["img/pict.png"];
 
     for(var i=0; i<4; i++) {
         rectArr[i] = [];
@@ -62,9 +72,14 @@ function createSpriteArray () {
             texturesArr[i][j] = new PIXI.Texture(mySpriteSheetImage, rectArr[i][j])
 
             sprArr[i][j] = new Sprite(texturesArr[i][j]);
+            sprArr[i][j].column=i;
+            sprArr[i][j].row=j;
+
         }
 
     }
+
+    initialArr=sprArr;
 
     addPieceToStage2(sprArr);
 
@@ -79,8 +94,7 @@ function addPieceToStage2(array) {
 
             array[i][j].x=i*75;
             array[i][j].y=j*75;
-            array[i][j].column=i;
-            array[i][j].row=j;
+
             array[i][j].interactive = true;
 
             // array[i][j].anchor.x=0.5;
@@ -89,13 +103,13 @@ function addPieceToStage2(array) {
 
             array[i][j]
                 .on('mousedown', onDragStart)
-                .on('touchstart', onDragStart)
-                .on('mouseup', onDragEnd)
-                .on('mouseupoutside', onDragEnd)
-                .on('touchend', onDragEnd)
-                .on('touchendoutside', onDragEnd)
+                //.on('mouseup', onDragEnd2)
                 .on('mousemove', onDragMove)
-                .on('touchmove', onDragMove);
+                .on('mouseupoutside', onDragEnd)
+                //.on('touchstart', onDragStart)
+                // .on('touchend', onDragEnd)
+                // .on('touchendoutside', onDragEnd)
+                // .on('touchmove', onDragMove);
             stage.addChild(array[i][j]);
 
         }
@@ -104,12 +118,16 @@ function addPieceToStage2(array) {
 
     animate();
 
+    if(checkWin(initialArr,array)){
+        console.log("you win")
+    }
+
 }
 
 function animate() {
 
     renderer.render(stage);
-    requestAnimationFrame( animate );
+    requestAnimationFrame(animate);
 }
 
 
@@ -129,11 +147,23 @@ function onDragStart(event){
 
 
 
+function onDragEnd2() {
+    console.log("onDragEnd2")
+    this.alpha = 1;
+
+    this.dragging = false;
+
+
+    this.data = null;
+}
+
 function onDragEnd() {
+
+    console.log("onDragEnd")
 
     var newXpos=Math.round(this.position.x);
     var newYpos=Math.round(this.position.y);
-    console.log("toXPos "+newXpos+ " toXPos "  + newYpos);
+    console.log("toXPos "+newXpos+ " toYPos "  + newYpos);
 
     var sprfromX=this.column;
     var sprfromY=this.row;
@@ -152,21 +182,27 @@ function onDragEnd() {
 
     this.data = null;
 
+    //stage.addChild(this)
 
-    for (var i = stage.children.length - 1; i >= 0; i--) {
-        stage.removeChild(stage.children[i]);
-    };
+    // for (var i = stage.children.length - 1; i >= 0; i--) {
+    //     stage.removeChild(stage.children[i]);
+    // };
 
 
     swapPlacesInMatrix(sprArr,sprfromX,sprfromY,toY,toX);
 
+}
 
 
+
+function countPositions(oldX,oldY,newX,newY){
 
 
 
 
 }
+
+
 
 function onDragMove(){
 
@@ -185,6 +221,16 @@ function onDragMove(){
 
             if(newPosition.y>300){
                 newPosition.y = Math.min(this.y, 300); //TODO not number -stage.height-this.height
+
+            }
+
+            if(newPosition.x<0){
+                newPosition.x = Math.min(this.x, 0);
+
+            }
+
+            if(newPosition.y<0){
+                newPosition.y = Math.min(this.y, 0);
 
             }
 
@@ -224,23 +270,59 @@ function swapPlacesInMatrix(array,columnFrom,rowFrom,rowTo,columnTo) {
     var tempTo=array[columnTo][rowTo];
     console.log("tempTo" + tempTo)
 
-    for (var i = 0; i<4 ; i++){
-        // column to change = offsetX, in row = offsetY
+    // for (var i = 0; i<4 ; i++){
+    //     // column to change = offsetX, in row = offsetY
+    //
+    //     for (var j = 0 ; j<4 ; j++){
+    //
+    //
+    //         array[columnFrom][rowFrom]=array[columnTo][rowTo];
+    //         array[columnTo][rowTo]=tempFrom;
+    //         array[columnFrom][rowFrom]=tempTo;
+    //
+    //
+    //     }
+    //
+    // }
 
-        for (var j = 0 ; j<4 ; j++){
+    array[columnFrom][rowFrom]=array[columnTo][rowTo];
+    array[columnTo][rowTo]=tempFrom;
+    array[columnFrom][rowFrom]=tempTo;
 
 
-            array[columnFrom][rowFrom]=array[columnTo][rowTo];
-            array[columnTo][rowTo]=tempFrom;
-            array[columnFrom][rowFrom]=tempTo;
 
+    addPieceToStage2(array);
+
+}
+
+function checkWin (initialArr, array){
+    var win=0;
+    var no_win=0;
+    for (var i = 0; i < 4; i++){
+        for (var j = 0; j < 4; j++){
+
+            if (initialArr[i][0].column==array[j][0].column&&initialArr[i][1].row==array[j][1].row){
+                console.log("win!")
+                win+=1;
+            }
+            else {
+                console.log("no win!")
+                no_win+=1;
+            }
 
         }
 
     }
+    console.log("win!" +win)
+    console.log("no win!" +no_win )
+    //TODO 16 - settings for game
+    if(win==16){
+        return true;
+            }
+    else {
+        return false}
 
 
-    addPieceToStage2(array);
 
 }
 
@@ -336,6 +418,38 @@ function matrixArray(){
 
 function compareRandom(a, b) {
     return Math.random() - 0.5;
+}
+
+
+function snuffle2D(){
+    var arr=[0,1,2,3];
+    var longArr= [[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]];
+
+    arr.sort(compareRandom);
+
+    for (var i = 0; i<4 ; i++){
+        // column to change = offsetX, in row = offsetY
+        var ww=arr[i];
+        //console.log(ww);
+
+        for (var j = 0 ; j<4 ; j++){
+            var qq=arr[j]
+            var temp=longArr[i][j]
+            var temp2=longArr[ww][j];
+            longArr[i][j]=longArr[ww][j]
+
+            longArr[ww][j]=temp;
+            
+
+
+
+
+
+        }
+
+    }
+    console.log(longArr)
+
 }
 
 
