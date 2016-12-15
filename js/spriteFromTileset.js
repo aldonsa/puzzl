@@ -18,9 +18,20 @@ var Container = PIXI.Container,
 var clickPos={};
 var sprArr=[];
 var initialArr=[];
+var sprfromX;
+var sprfromY;
 
- var stage = new Container(),
 
+var toX;
+var toY;
+
+var stage = new Container();
+var gameField = new Container(300,300);
+var readyPeacture = new Container(300,300);
+// gameField.position.x=25;
+// gameField.position.y=25;
+stage.addChild(readyPeacture);
+stage.addChild(gameField);
 // var stage= new ParticleContainer(300,{
 //
 //     interactiveChildren:true
@@ -44,6 +55,7 @@ function setup() {
     //snuffle2D();
 
     //console.log(ww);
+    //addReadyPicture ()
     createSpriteArray();
 
     renderer.render(stage);
@@ -72,20 +84,41 @@ function createSpriteArray () {
             texturesArr[i][j] = new PIXI.Texture(mySpriteSheetImage, rectArr[i][j])
 
             sprArr[i][j] = new Sprite(texturesArr[i][j]);
-            sprArr[i][j].column=i;
-            sprArr[i][j].row=j;
+
 
         }
 
     }
 
-    initialArr=sprArr;
+    //initialArr=sprArr;
 
     addPieceToStage2(sprArr);
 
 }
 
+
+
+function addReadyPicture () {
+
+   var wholeImageTexture  = TextureCache["img/pict.png"];
+   var wholeImage = new Sprite(wholeImageTexture)
+
+   readyPeacture.addChild(wholeImage);
+
+
+
+    animate();
+
+
+}
+
+
+
+
+
+
 function addPieceToStage2(array) {
+
 
 
     for(var i=0; i<4; i++){
@@ -96,21 +129,26 @@ function addPieceToStage2(array) {
             array[i][j].y=j*75;
 
             array[i][j].interactive = true;
+            array[i][j].column=i;
+            array[i][j].row=j;
 
-            // array[i][j].anchor.x=0.5;
-            // array[i][j].anchor.y=0.5;
-
-
-            array[i][j]
+            var onePiece=array[i][j];
+            //onePiece.anchor.x=0.5;
+            //onePiece.anchor.y=0.5;
+            onePiece.off("mousedown");
+            onePiece.off("mouseup");
+            onePiece.off("mousemove");
+            onePiece.off("mouseupoutside");
+            onePiece
                 .on('mousedown', onDragStart)
-                //.on('mouseup', onDragEnd2)
+                .on('mouseup', onDragEnd)
                 .on('mousemove', onDragMove)
                 .on('mouseupoutside', onDragEnd)
                 //.on('touchstart', onDragStart)
                 // .on('touchend', onDragEnd)
                 // .on('touchendoutside', onDragEnd)
                 // .on('touchmove', onDragMove);
-            stage.addChild(array[i][j]);
+            gameField.addChild(onePiece);
 
         }
     }
@@ -118,9 +156,9 @@ function addPieceToStage2(array) {
 
     animate();
 
-    if(checkWin(initialArr,array)){
-        console.log("you win")
-    }
+    // if(checkWin(initialArr,array)){
+    //     console.log("you win")
+    // }
 
 }
 
@@ -147,32 +185,18 @@ function onDragStart(event){
 
 
 
-function onDragEnd2() {
-    console.log("onDragEnd2")
-    this.alpha = 1;
 
-    this.dragging = false;
-
-
-    this.data = null;
-}
 
 function onDragEnd() {
 
+
     console.log("onDragEnd")
+    sprfromX=this.column;
+    sprfromY=this.row;
 
-    var newXpos=Math.round(this.position.x);
-    var newYpos=Math.round(this.position.y);
-    console.log("toXPos "+newXpos+ " toYPos "  + newYpos);
 
-    var sprfromX=this.column;
-    var sprfromY=this.row;
 
     console.log("fromX "+sprfromX+ " fromY "  + sprfromY);
-
-    var toX=(Math.floor((newXpos+75)/75))-1;
-    var toY=(Math.floor((newYpos+75)/75))-1;
-
     console.log("toX "+toX+ " toY " + toY);
 
     this.alpha = 1;
@@ -182,11 +206,14 @@ function onDragEnd() {
 
     this.data = null;
 
-    //stage.addChild(this)
 
-    // for (var i = stage.children.length - 1; i >= 0; i--) {
-    //     stage.removeChild(stage.children[i]);
-    // };
+
+    for (var i = gameField.children.length - 1; i >= 0; i--) {
+        gameField.removeChild(gameField.children[i]);
+    };
+
+
+
 
 
     swapPlacesInMatrix(sprArr,sprfromX,sprfromY,toY,toX);
@@ -194,13 +221,6 @@ function onDragEnd() {
 }
 
 
-
-function countPositions(oldX,oldY,newX,newY){
-
-
-
-
-}
 
 
 
@@ -235,16 +255,27 @@ function onDragMove(){
             }
 
 
+        // var sprfromX=this.column;
+        // var sprfromY=this.row;
+        // console.log("fromX "+sprfromX+ " fromY "  + sprfromY);
+        // console.log(Math.round(newPosition.x));
+        //
+        toX=Math.floor(Math.round(newPosition.x)/75);
+        toY=Math.floor(Math.round(newPosition.y)/75);
+        //
+        // console.log("toX "+toX+ " toY " + toY);
+        // ;
+
+        this.position.x = toX*75;
+        this.position.y = toY*75;
 
 
-
-
-        this.position.x = newPosition.x;
-        this.position.y = newPosition.y;
-
+        // this.position.x = newPosition.x;
+        // this.position.y = newPosition.y;
 
 
     }
+
 
 
 }
