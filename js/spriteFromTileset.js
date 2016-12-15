@@ -36,7 +36,7 @@ stage.addChild(gameField);
 //
 //     interactiveChildren:true
 // })
-renderer = autoDetectRenderer(300, 300);
+renderer = autoDetectRenderer(500, 500);
 
 document.body.appendChild(renderer.view);
 
@@ -57,6 +57,10 @@ function setup() {
     //console.log(ww);
     //addReadyPicture ()
     createSpriteArray();
+
+    // var someArr=[[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]];
+    // arrayToMess(someArr)
+    // console.log(someArr)
 
     renderer.render(stage);
 
@@ -90,9 +94,11 @@ function createSpriteArray () {
 
     }
 
-    //initialArr=sprArr;
 
-    addPieceToStage2(sprArr);
+
+    //arrayToMess(sprArr)
+    createInitialArray(sprArr);
+    //addPieceToStage2(sprArr);
 
 }
 
@@ -113,11 +119,43 @@ function addReadyPicture () {
 }
 
 
+function arrayToMess (array) {
 
+
+    for(var i=0; i<4; i++){
+
+        for(var j=0; j<4; j++){
+            array[i][j]=array[j][i]
+
+
+        }
+    }
+
+}
+
+
+function createInitialArray (array){
+    for(var i=0; i<4; i++){
+        initialArr[i]=[];
+        for(var j=0; j<4; j++){
+
+            array[i][j].column=i;
+            array[i][j].row=j;
+            initialArr[i][j]=array[i][j]
+
+        }
+    }
+
+
+    addPieceToStage2(array);
+}
 
 
 
 function addPieceToStage2(array) {
+
+    console.log(checkWin(initialArr,array))
+
 
 
 
@@ -156,9 +194,7 @@ function addPieceToStage2(array) {
 
     animate();
 
-    // if(checkWin(initialArr,array)){
-    //     console.log("you win")
-    // }
+
 
 }
 
@@ -180,6 +216,10 @@ function onDragStart(event){
 
     clickPos.x=this.position.x;
     clickPos.y=this.position.y;
+    //sprfromX=(this.position.x/75)-1;
+    //sprfromY=(this.position.y/75)-1 ;
+
+
 
 }
 
@@ -193,8 +233,6 @@ function onDragEnd() {
     console.log("onDragEnd")
     sprfromX=this.column;
     sprfromY=this.row;
-
-
 
     console.log("fromX "+sprfromX+ " fromY "  + sprfromY);
     console.log("toX "+toX+ " toY " + toY);
@@ -326,13 +364,37 @@ function swapPlacesInMatrix(array,columnFrom,rowFrom,rowTo,columnTo) {
 
 }
 
-function checkWin (initialArr, array){
+function checkWinNew (array){
     var win=0;
     var no_win=0;
+
+    console.log("column " +array[0][0].column*75)
+    console.log("column " +array[0][0].position.x)
+
     for (var i = 0; i < 4; i++){
         for (var j = 0; j < 4; j++){
+            //console.log(array[i][j].column)
+            //console.log(array[i][j].position.x)
 
-            if (initialArr[i][0].column==array[j][0].column&&initialArr[i][1].row==array[j][1].row){
+            // var tempNumbX=array[i][j].column*75;
+            // var tempNumbY=array[i][j].row*75;
+            //
+            // if (tempNumbX==array[i][j].position.x&&tempNumbY==array[i][j].position.y){
+            //     console.log("win!")
+            //     win+=1;
+            // }
+            // else {
+            //     console.log("no win!")
+            //     no_win+=1;
+            // }
+
+
+
+
+
+
+            console.log(array[i][j].position.x)
+            if (array[i][0].column==array[j][0].position.x&&array[i][1].row==array[j][1].position.y){
                 console.log("win!")
                 win+=1;
             }
@@ -350,6 +412,41 @@ function checkWin (initialArr, array){
     if(win==16){
         return true;
             }
+    else {
+        return false}
+
+
+
+}
+
+
+
+function checkWin (initialArr, array){
+    var win=0;
+    var no_win=0;
+    console.log("column " +initialArr[0][0].column)
+    console.log("column " +array[0][0].column)
+    for (var i = 0; i < 4; i++){
+        for (var j = 0; j < 4; j++){
+
+            if (initialArr[i][j].column==array[i][j].column&&initialArr[i][j].row==array[i][j].row){
+                console.log("win!")
+                win+=1;
+            }
+            else {
+                console.log("no win!")
+                no_win+=1;
+            }
+
+        }
+
+    }
+    console.log("win!" +win)
+    console.log("no win!" +no_win )
+    //TODO 16 - settings for game
+    if(win==16){
+        return true;
+    }
     else {
         return false}
 
