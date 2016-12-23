@@ -63,7 +63,8 @@ function setup() {
     // console.log(someArr)
 
     renderer.render(stage);
-
+    var ww=[[0,1],[2,3],[4,5]]
+    console.log(Shuffle(ww))
 }
 
 
@@ -74,32 +75,70 @@ function setup() {
 function createSpriteArray () {
     var rectArr=[];
     var texturesArr=[];
-
+    var prArr=[];
     var mySpriteSheetImage  = TextureCache["img/pict.png"];
 
     for(var i=0; i<4; i++) {
         rectArr[i] = [];
         texturesArr [i] = [];
-        sprArr[i] = [];
+        prArr[i] = [];
         for (var j = 0; j < 4; j++) {
 
 
             rectArr[i][j] = new Rectangle(75 * i, 75 * j, 75, 75);
             texturesArr[i][j] = new PIXI.Texture(mySpriteSheetImage, rectArr[i][j])
 
-            sprArr[i][j] = new Sprite(texturesArr[i][j]);
+            prArr[i][j] = new Sprite(texturesArr[i][j]);
 
 
         }
 
     }
 
+    prArr = prArr[0].map(function(col, i) {
+        return prArr.map(function(row) {
+            return row[i]
+        })
+    });
 
+
+
+    sprArr=prArr;
+
+    //console.log(sprArr)
 
     //arrayToMess(sprArr)
-    createInitialArray(sprArr);
-    //addPieceToStage2(sprArr);
+    createInitialArray();
+    addPieceToStage2(sprArr);
+    //addMess(sprArr);
+    //OneMoreMess(sprArr)
 
+}
+
+
+function OneMoreMess(array){
+
+    // var tempFrom=array[3][3];
+    //
+    // var tempTo=array[0][0];
+    //
+    //
+    //
+    //
+    // array[3][3]=array[0][0];
+    // array[0][0]=tempFrom;
+    // array[3][3]=tempTo;
+
+    array = array[0].map(function(col, i) {
+        return array.map(function(row) {
+            return row[i]
+        })
+    });
+
+
+    console.log("OneMoreMess")
+    console.log(array[0][0].column)
+    addPieceToStage2(array);
 }
 
 
@@ -139,16 +178,24 @@ function createInitialArray (array){
         initialArr[i]=[];
         for(var j=0; j<4; j++){
 
-            array[i][j].column=i;
-            array[i][j].row=j;
-            initialArr[i][j]=array[i][j]
+            //array[i][j].column=i;
+            //array[i][j].row=j;
+            //initialArr[i][j]=array[i][j]
+
+            initialArr[i][j]=[i,j];
+
 
         }
     }
 
-
-    addPieceToStage2(array);
+    console.log("initialArr");
+    console.log(initialArr);
+    //addPieceToStage2(array);
 }
+
+
+
+
 
 
 
@@ -167,8 +214,10 @@ function addPieceToStage2(array) {
             array[i][j].y=j*75;
 
             array[i][j].interactive = true;
-            array[i][j].column=i;
-            array[i][j].row=j;
+            sprArr[i][j].column=i;
+            sprArr[i][j].row=j;
+
+
 
             var onePiece=array[i][j];
             //onePiece.anchor.x=0.5;
@@ -424,17 +473,20 @@ function checkWinNew (array){
 function checkWin (initialArr, array){
     var win=0;
     var no_win=0;
-    console.log("column " +initialArr[0][0].column)
+    console.log("column " +initialArr[0][0][0])
     console.log("column " +array[0][0].column)
     for (var i = 0; i < 4; i++){
         for (var j = 0; j < 4; j++){
+            var columnI=initialArr[i][j][0];
+            var rowI=initialArr[i][j][1];
 
-            if (initialArr[i][j].column==array[i][j].column&&initialArr[i][j].row==array[i][j].row){
+            if (columnI==array[i][j].column&&rowI==array[i][j].row){
                 console.log("win!")
                 win+=1;
             }
             else {
                 console.log("no win!")
+
                 no_win+=1;
             }
 
@@ -455,7 +507,10 @@ function checkWin (initialArr, array){
 }
 
 
-
+function Shuffle(o) {
+    for (var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+    return o;
+};
 
 
 
