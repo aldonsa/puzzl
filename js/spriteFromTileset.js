@@ -1,7 +1,7 @@
 
 
 var Container = PIXI.Container,
-    ParticleContainer=PIXI.ParticleContainer,
+
     autoDetectRenderer = PIXI.autoDetectRenderer,
 
     loader = PIXI.loader,
@@ -24,6 +24,8 @@ var sprfromY;
 
 var toX;
 var toY;
+
+var state;
 
 var stage = new Container();
 var gameField = new Container(300,300);
@@ -52,19 +54,11 @@ loader.add("img/images.json")
 function setup() {
 
 
-    //snuffle2D();
-
-    //console.log(ww);
-    //addReadyPicture ()
-    createSpriteArray();
-
-    // var someArr=[[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]];
-    // arrayToMess(someArr)
-    // console.log(someArr)
-
+    //createSpriteArray();
+    addReadyPicture ();
+    createStartBtn();
     renderer.render(stage);
-    var ww=[[0,1],[2,3],[4,5]]
-    console.log(Shuffle(ww))
+
 }
 
 
@@ -73,6 +67,8 @@ function setup() {
 
 
 function createSpriteArray () {
+
+
     var rectArr=[];
     var texturesArr=[];
     var prArr=[];
@@ -89,7 +85,8 @@ function createSpriteArray () {
             texturesArr[i][j] = new PIXI.Texture(mySpriteSheetImage, rectArr[i][j])
 
             prArr[i][j] = new Sprite(texturesArr[i][j]);
-
+            prArr[i][j].column2=i;
+            prArr[i][j].row2=j;
 
         }
 
@@ -110,6 +107,7 @@ function createSpriteArray () {
     //arrayToMess(sprArr)
     createInitialArray();
     addPieceToStage2(sprArr);
+
     //addMess(sprArr);
     //OneMoreMess(sprArr)
 
@@ -201,44 +199,59 @@ function createInitialArray (array){
 
 function addPieceToStage2(array) {
 
-    console.log(checkWin(initialArr,array))
+    //console.log(checkWin(initialArr,array))
+
+    if(checkWin(initialArr,array)){
+
+        gameField.visible=false;
+
+        addReadyPicture();
+
+    }
+
+    else {
+
+        for(var i=0; i<4; i++){
+
+            for(var j=0; j<4; j++){
+
+                array[i][j].x=i*75;
+                array[i][j].y=j*75;
+
+                array[i][j].interactive = true;
+                sprArr[i][j].column=i;
+                sprArr[i][j].row=j;
 
 
 
-
-    for(var i=0; i<4; i++){
-
-        for(var j=0; j<4; j++){
-
-            array[i][j].x=i*75;
-            array[i][j].y=j*75;
-
-            array[i][j].interactive = true;
-            sprArr[i][j].column=i;
-            sprArr[i][j].row=j;
-
-
-
-            var onePiece=array[i][j];
-            //onePiece.anchor.x=0.5;
-            //onePiece.anchor.y=0.5;
-            onePiece.off("mousedown");
-            onePiece.off("mouseup");
-            onePiece.off("mousemove");
-            onePiece.off("mouseupoutside");
-            onePiece
-                .on('mousedown', onDragStart)
-                .on('mouseup', onDragEnd)
-                .on('mousemove', onDragMove)
-                .on('mouseupoutside', onDragEnd)
+                var onePiece=array[i][j];
+                //onePiece.anchor.x=0.5;
+                //onePiece.anchor.y=0.5;
+                onePiece.off("mousedown");
+                onePiece.off("mouseup");
+                onePiece.off("mousemove");
+                onePiece.off("mouseupoutside");
+                onePiece
+                    .on('mousedown', onDragStart)
+                    .on('mouseup', onDragEnd)
+                    .on('mousemove', onDragMove)
+                    .on('mouseupoutside', onDragEnd)
                 //.on('touchstart', onDragStart)
                 // .on('touchend', onDragEnd)
                 // .on('touchendoutside', onDragEnd)
                 // .on('touchmove', onDragMove);
-            gameField.addChild(onePiece);
+                gameField.addChild(onePiece);
 
+            }
         }
+
     }
+
+
+
+
+
+
 
 
     animate();
@@ -251,6 +264,33 @@ function animate() {
 
     renderer.render(stage);
     requestAnimationFrame(animate);
+
+
+}
+
+function play(){
+   console.log("play")
+
+}
+
+function end() {
+    var wholeImageTexture  = TextureCache["img/pict.png"];
+    var wholeImage = new Sprite(wholeImageTexture)
+    var popUp = new Graphics();
+    popUp.beginFill(0xFF6972);
+    popUp.lineStyle(4, 0xFF0000, 1);
+    popUp.drawRect(0, 0, 250, 250);
+    popUp.endFill();
+    popUp.x = 0;
+    popUp.y = 0;
+    var text ="You win"
+    var message = new Text(text,
+        {font: "48px Impact", fill: "red"}
+    );
+    readyPeacture.addChild(wholeImage);
+    readyPeacture.addChild(popUp);
+    readyPeacture.addChild(message);
+    animate();
 }
 
 
@@ -268,10 +308,38 @@ function onDragStart(event){
     //sprfromX=(this.position.x/75)-1;
     //sprfromY=(this.position.y/75)-1 ;
 
+}
+
+
+function createStartBtn(){
+
+    var rectangle = new Graphics();
+    rectangle.beginFill(0x0033CC);
+    rectangle.lineStyle(4, 0xFF0000, 1);
+    rectangle.drawRect(0, 0, 96, 96);
+    rectangle.endFill();
+    rectangle.x = 64;
+    rectangle.y = 64;
+    readyPeacture.interactive=true;
+    readyPeacture.on("click",createSpriteArray );
+    readyPeacture.addChild(rectangle);
 
 
 }
 
+
+function createPopUp(){
+    var popUp = new Graphics();
+    popUp.beginFill(0xFF6972);
+
+    popUp.drawRect(0, 0, 250, 250);
+    popUp.endFill();
+    popUp.x = 0;
+    popUp.y = 0;
+    readyPeacture.addChild(popUp);
+
+
+}
 
 
 
@@ -319,7 +387,9 @@ function onDragMove(){
     if (this.dragging)
     {
 
+
         var newPosition = this.data.getLocalPosition(this.parent);
+
 
             if(newPosition.x>300){
                 newPosition.x = Math.min(this.x, 300); //TODO not number -stage.width-this.width
@@ -474,13 +544,13 @@ function checkWin (initialArr, array){
     var win=0;
     var no_win=0;
     console.log("column " +initialArr[0][0][0])
-    console.log("column " +array[0][0].column)
+    console.log(array)
     for (var i = 0; i < 4; i++){
         for (var j = 0; j < 4; j++){
             var columnI=initialArr[i][j][0];
             var rowI=initialArr[i][j][1];
 
-            if (columnI==array[i][j].column&&rowI==array[i][j].row){
+            if (columnI==array[i][j].column2&&rowI==array[i][j].row2){
                 console.log("win!")
                 win+=1;
             }
